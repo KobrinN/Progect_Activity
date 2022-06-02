@@ -1,0 +1,230 @@
+Первая версия кода
+//---------------------------------------------------------------------
+#include <iostream>
+#include <stdio.h>   // printf, fgets 
+#include <string.h>  // strcpy, strncmp, strchr
+#include <string>
+#include <stdlib.h>
+#pragma hdrstop
+#include <windows.h> // SetConsoleOutputCP, SetConsoleCP
+#pragma package(smart_init)
+#define Unit1H
+using namespace std;
+
+///////////////////////////////////////////////////////////////////////
+// нахождение НОД методом Евклида
+long long gcd(long long a, long long b)
+{
+	if (b == 0)
+		return a;
+	return gcd(b, a % b);
+}
+
+long long mul(long long a, long long b, long long m)
+{
+	if (b == 1)
+		return a;
+	if (b % 2 == 0)
+	{
+		long long t = mul(a, b / 2, m);
+		return (2 * t) % m;
+	}
+	return (mul(a, b - 1, m) + a) % m;
+}
+//возведение в степень
+long long pows(long long a, long long b, long long m, int& k)
+{
+	if (b == 0)
+		return 1;
+	if (b % 2 == 0)
+	{
+		long long t = pows(a, b / 2, m, k);
+		return mul(t, t, m) % m;
+	}
+	return (mul(pows(a, b - 1, m, k), a, m)) % m;
+}
+// тест Ферма (до 100 итераций)
+bool test_ferma(long long x, int& k)
+{
+	if (x == 2)
+		return true;
+	srand(time(NULL));
+	for (int i = 0; i < 100; i++)
+	{
+		++k; // счетчик итераций
+		long long a = (rand() % (x - 2)) + 2;
+		if (gcd(a, x) != 1) // НОД методом Евклида
+			return false;
+		if (pows(a, x - 1, x, k) != 1) // возведение в степень
+			return false;
+	}
+	return true;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////
+
+
+// самый простой метод, от 2 до корня числа
+bool prost_test(long long n, int& k)
+{
+	for (long long i = 2; i <= sqrt(n); i++)
+	{
+		k++;
+		if (n % i == 0)
+			return false;
+	}
+	return true;
+}
+
+
+///////////////////////////////////////////////////////////////////////
+
+
+// тест Люка - Лемера
+bool lucas_lehmer_test(long long p)
+{
+	if ((p % 2) == 0)
+		return false;
+	int S = 4, k = 1;
+	int M = pow(2, p) - 1;
+	while (k != p - 1)
+	{
+		S = ((S * S) - 2) % M;
+		k += 1;
+	}
+	if (S == 0)
+		return true;
+	else
+		return false;
+}
+
+
+
+int main()
+{
+	SetConsoleOutputCP(1251);
+	SetConsoleCP(1251);
+	int a;
+	char c;
+	do
+	{
+		cout << "Введите любое a (a>2): ";
+		cin >> a;
+		cout << "\nВыберите 1 чтобы решить или 0, чтобы завершить:\n";
+		cin >> c;
+		switch (c)
+		{
+		case '1':
+		{
+			// вероятносный тест Ферма
+			cout << "##############################\n";
+			cout << "1 - вероятносный тест Ферма(до 100 итераций)\n";
+			int k = 0;
+			if (test_ferma(a, k) == true)
+				cout << "Число простое\n";
+			else
+				cout << "Число составное\n";
+			cout << "Кол-во итераций: " << k << endl << "-------------------------------\n";
+
+			// простой метод
+			cout << "2 - самый простой тест\n";
+			k = 0;
+			if (prost_test(a, k) == true) // true = простое
+				cout << "Число простое\n";
+			else
+				cout << "Число составное\n";
+			cout << "Кол-во итераций: " << k << endl << "-------------------------------\n";
+
+			// тест Люка-Лемера
+
+			cout << "3 - тест Люка-Лемера другой\n";
+			if (lucas_lehmer_test(a) == true) // true = простое
+				cout << "Число простое\n";
+			else
+				cout << "Число составное\n";
+			cout << "Кол-во итераций: " << k << endl << "==========================================================================================\n";
+
+			break;
+		}
+		case 's': // начать заново
+			break;
+		case '0': // завершение работы программы
+			return 0;
+		default:
+			cout << "\nНет такой команды\n";
+			break;
+		}
+	} while (c != '0');
+	return 0;
+}
+
+
+
+
+
+/*
+
+
+int main()
+{
+	SetConsoleOutputCP(1251);
+	SetConsoleCP(1251);
+	int a;
+	char c;
+	do
+	{
+		cout << "Введите любое положительное число: ";
+		cin >> a;
+		cout << "\nВыберите метод поиска или 0, чтобы завершить:\n\
+		1 - вероятносный тест Ферма (до 100 итераций)\n\
+		2 - простой метод\n\
+		3 - третий метод\n\
+		s - начать заново\n";
+		cin >> c;
+		switch (c)
+		{
+		case '1': // вероятносный метод Ферма
+		{
+			int k = 0;
+			if (test_ferma(a, k) == true)
+				cout << "Число простое\n";
+			else
+				cout << "Число составное\n";
+			cout << "Кол-во итераций: " << k << endl;
+			break;
+		}
+		case '2': // простой метод
+		{
+			int k = 0;
+			if (prost_test(a, k) == true)
+				cout << "Число простое\n";
+			else
+				cout << "Число составное\n";
+			cout << "Кол-во итераций: " << k << endl;
+			break;
+		}
+		case '3': // третий метод
+		{
+			int k = 0;
+			if (lucas_lehmer_test(a) == true)
+				cout << "Число простое\n";
+			else
+				cout << "Число составное\n";
+			//cout << "Кол-во итераций: " << k << endl;
+			break;
+		}
+		case 's': // начать заново
+			break;
+		case '0': // завершение работы программы
+			return 0;
+		default:
+			cout << "\nНет такой команды\n";
+			break;
+		}
+	} while (c != '0');
+	return 0;
+}
+
+*/
