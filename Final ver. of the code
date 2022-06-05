@@ -1,0 +1,156 @@
+#pragma hdrstop
+#include <iostream>
+#include <windows.h> // SetConsoleOutputCP, SetConsoleCP
+#include <time.h>
+#pragma package(smart_init)
+#pragma warning(disable:4996)
+#define Unit1H
+using namespace std;
+
+///////////////////////////////////////////////////////////////////////
+// нахождение НОД методом Евклида
+unsigned long long greatest_common_divisor(unsigned long long a, unsigned long long b)
+{
+	if (a % b == 0)
+		return b;
+	if (b % a == 0)
+		return a;
+	if (a > b)
+		return greatest_common_divisor(a % b, b);
+	return greatest_common_divisor(a, b % a);
+}
+// двоичное умножение двух чисел по модулю
+unsigned long long mul(unsigned long long a, unsigned long long b, unsigned long long m)
+{
+	if (b == 1)
+		return a;
+	if (b % 2 == 0)
+	{
+		long long t = mul(a, b / 2, m);
+		return (2 * t) % m;
+	}
+	return (mul(a, b - 1, m) + a) % m;
+}
+//возведение в степень
+unsigned long long pows(unsigned long long a, unsigned long long b, unsigned long long m)
+{
+	if (b == 0)
+		return 1;
+	if (b % 2 == 0)
+	{
+		unsigned long long t = pows(a, b / 2, m);
+		return mul(t, t, m) % m;
+	}
+	return (mul(pows(a, b - 1, m), a, m)) % m;
+}
+
+
+/////////////////////////////////////////////////////
+
+// тест Ферма (до 100 итераций)
+bool test_ferma(long long a, int& k)
+{
+	k = 0;
+	srand(time(NULL));
+	for (int i = 0; i < 100; i++)
+	{
+		++k; // счетчик итераций
+		unsigned long long x = (rand() % (a - 2)) + 2;
+		if (greatest_common_divisor(x, a) != 1) // НОД методом Евклида
+			return false;
+		if (pows(x, a - 1, a) != 1) // возведение в степень
+			return false;
+	}
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////
+
+// метод простых итераций, от 2 до корня числа
+bool prost_test(long long a, int& k)
+{
+	k = 0;
+	for (unsigned long long i = 2; i <= sqrt(a); i++)
+	{
+		k++;
+		if (a % i == 0)
+			return false;
+	}
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+
+// метод по решету Эратосфена
+bool eratosthenes_sieve_test(long long a, int& k)
+{
+	unsigned long long i, j;
+	k = 0; // счетчик итераций
+	bool* Array = new bool[sqrt(a)];
+	for (i = 2; i <= sqrt(a); i++)
+		Array[i] = true;
+	for (i = 2; i <= sqrt(a); i++)
+	{
+		if (Array[i] == true)
+			for (j = 2 * i; j <= sqrt(a); j = j + i) // пометка составных чисел (решето)
+				Array[j] = false; // (false == составное)
+	}
+	for (i = 2; i <= sqrt(a); i++) // массив с помеченными простыми числами (true == простое)
+	{
+		if (Array[i] == true)
+		{
+			k++;
+			if (a % i == 0) return false; // делится ли число на простое нацело
+		}
+	} // если не делится, то оно простое
+	return true;
+}
+
+
+int main()
+{
+	SetConsoleOutputCP(1251);
+	SetConsoleCP(1251);
+	long long a = 1;
+	int k;
+	do
+	{
+		cout << "===================================================================\n";
+		cout << "Введите целое число А, или 0 чтобы завершить: ";
+		cin >> a;
+		cout << "Введено число " << a << "\n";
+		if (a == 0) return 0;
+		else if (a < 0) cout << "Введено отрицательное число\n";
+		else if (a == 1) cout << "Введено 1 - простое число\n";
+		else if (a == 2) cout << "Введено 2 - простое число\n";
+		else if ((a % 2) == 0) cout << "Чётное число - всегда составное\n";
+		else
+		{
+			// вероятносный тест Ферма
+			cout << "1 - вероятносный тест Ферма (до 100 итераций)\n";
+			if (test_ferma(a, k) == true) // true = простое
+				cout << "Число простое\n";
+			else
+				cout << "Число составное\n";
+			cout << "Кол-во итераций: " << k << endl << "-------------------------------\n";
+
+			// метод простых итераций
+			cout << "2 - самый простой тест (по методу простых итераций)\n";
+			if (prost_test(a, k) == true) // true = простое
+				cout << "Число простое\n";
+			else
+				cout << "Число составное\n";
+			cout << "Кол-во итераций: " << k << endl << "-------------------------------\n";
+
+			// тест, основанный на решете Эратосфена
+			cout << "3 - тест на основе решета Эратосфена:\n";
+			if (eratosthenes_sieve_test(a, k) == true) // true = простое
+				cout << "Число простое\n";
+			else
+				cout << "Число составное\n";
+			cout << "Кол-во итераций: " << k << endl;
+		}
+	} while (a != '0');
+	return 0;
+}
