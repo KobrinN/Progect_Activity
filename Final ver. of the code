@@ -31,7 +31,7 @@ unsigned long long mul(unsigned long long a, unsigned long long b, unsigned long
 	}
 	return (mul(a, b - 1, m) + a) % m;
 }
-//возведение в степень
+// бинарное возведение в степень
 unsigned long long pows(unsigned long long a, unsigned long long b, unsigned long long m)
 {
 	if (b == 0)
