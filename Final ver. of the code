@@ -51,7 +51,6 @@ unsigned long long pows(unsigned long long a, unsigned long long b, unsigned lon
 bool test_ferma(long long a, int& k)
 {
 	k = 0;
-	srand(time(NULL));
 	for (int i = 0; i < 100; i++)
 	{
 		++k; // счетчик итераций
